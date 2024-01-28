@@ -4,7 +4,7 @@ import torch.nn as nn
 
 class Block(nn.Module):
     """
-    Two 3x3 convolutions with stride 1 and padding 1 followed by ReLUs with a 2x2
+    Two 3x3 convolutions with stride 1 and padding 1 followed by ReLUs
     """
 
     def __init__(self, in_channels: int, out_channels: int):
@@ -70,12 +70,9 @@ class UNet(nn.Module):
         self.input = Block(image_channels, n_channels)
 
         # downsampling
-        # downsample_channels = [image_channels, *ch_mults[:-1]]
         downsample_channels = [n_channels, *ch_mults[:-1]]
-        print("==downsample channels==")
-        print(downsample_channels)
-
         downsample_modules = []
+
         for in_channels, out_channels in zip(
             downsample_channels[:-1], downsample_channels[1:]
         ):
@@ -96,9 +93,6 @@ class UNet(nn.Module):
         # upsampling
         upsample_modules = []
         upsample_channels = [] if len(ch_mults) < 3 else [n_channels, *ch_mults][::-1]
-
-        print("==upsample channels==")
-        print(upsample_channels)
 
         for in_channels, middle_channels, out_channels in zip(
             upsample_channels[:-2], upsample_channels[1:-1], upsample_channels[2:]
@@ -121,9 +115,6 @@ class UNet(nn.Module):
         for downsample in self.downsamples:
             x = downsample(x)
             features.append(x)
-            print(x.shape)
-
-        print(len(features))
 
         x = self.middle(x)
 
@@ -133,4 +124,6 @@ class UNet(nn.Module):
             x = upsample(x)
 
         x = torch.cat((x, x1), dim=1)
-        print(x.shape)
+        x = self.final(x)
+
+        return x

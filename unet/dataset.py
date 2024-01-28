@@ -56,8 +56,11 @@ class MedicalDataset(Dataset):
         image_path, label_path = self.data[index]
 
         # open in black and white mode
-        image = Image.open(image_path, mode="L")
+        image = Image.open(image_path)
+        image = image.convert("L")
+
         label = Image.open(label_path)
+        label = label.convert("L")
 
         if self.transform is not None:
             image = self.transform(image)
@@ -66,10 +69,3 @@ class MedicalDataset(Dataset):
             label = self.target_transform(label)
 
         return image, label
-
-
-if __name__ == "__main__":
-    dataset = MedicalDataset(path="../data", split="train")
-
-    print(dataset[0])
-    print(len(dataset))
